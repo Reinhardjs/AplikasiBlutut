@@ -38,7 +38,6 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
 
     String filePath;
-    ProgressBar progressBar;
 
     private static final int DISCOVER_DURATION = 300;
     private static final int BLUETOOTH_REQUEST = 1111;
@@ -61,9 +60,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         fileNameTextView = findViewById(R.id.textView_FileName);
-        progressBar = findViewById(R.id.progressBar);
-
-        progressBar.setVisibility(View.GONE);
 
         if (!canAccessLocation() || !canAccessCamera() || !canAccessWriteStorage() || !canAccessReadStorage() || !canAccessReadContacts() || !canAccessWriteContacts()) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -113,7 +109,6 @@ public class MainActivity extends AppCompatActivity {
         Intent discoveryIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
         discoveryIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, DISCOVER_DURATION);
         startActivityForResult(discoveryIntent, BLUETOOTH_REQUEST);
-        progressBar.setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -126,11 +121,14 @@ public class MainActivity extends AppCompatActivity {
             intent.setType("*/*");
 
             File file = new File(filePath);
+
+            // Ini solusi dari https://medium.com/@ali.muzaffar/what-is-android-os-fileuriexposedexception-and-what-you-can-do-about-it-70b9eb17c6d0
+            // untuk mengatasi masalah fileuriexposedexception, Uri.fromFile() diganti dengan FileProvider.getUriForFile(...)
             Uri fileURI = FileProvider.getUriForFile(getApplicationContext(), getApplicationContext().getPackageName() + ".provider", file);;
             // intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(f));
+
             intent.putExtra(Intent.EXTRA_STREAM, fileURI);
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-
 
             PackageManager pm = getPackageManager();
             List<ResolveInfo> appsList = pm.queryIntentActivities(intent, 0);
