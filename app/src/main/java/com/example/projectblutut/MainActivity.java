@@ -21,6 +21,7 @@ import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -31,11 +32,13 @@ import java.util.List;
  *  https://stackoverflow.com/questions/4573761/bluetooth-file-transfer-in-android
  *  https://medium.com/@ali.muzaffar/what-is-android-os-fileuriexposedexception-and-what-you-can-do-about-it-70b9eb17c6d0
  *  https://stackoverflow.com/questions/38200282/android-os-fileuriexposedexception-file-storage-emulated-0-test-txt-exposed
+ *  https://stackoverflow.com/questions/19395970/android-bluetooth-background-listener
  */
 
 public class MainActivity extends AppCompatActivity {
 
     String filePath;
+    ProgressBar progressBar;
 
     private static final int DISCOVER_DURATION = 300;
     private static final int BLUETOOTH_REQUEST = 1111;
@@ -56,7 +59,11 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         fileNameTextView = findViewById(R.id.textView_FileName);
+        progressBar = findViewById(R.id.progressBar);
+
+        progressBar.setVisibility(View.GONE);
 
         if (!canAccessLocation() || !canAccessCamera() || !canAccessWriteStorage() || !canAccessReadStorage() || !canAccessReadContacts() || !canAccessWriteContacts()) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -106,6 +113,7 @@ public class MainActivity extends AppCompatActivity {
         Intent discoveryIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
         discoveryIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, DISCOVER_DURATION);
         startActivityForResult(discoveryIntent, BLUETOOTH_REQUEST);
+        progressBar.setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -113,7 +121,6 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (resultCode == DISCOVER_DURATION && requestCode == BLUETOOTH_REQUEST) {
-
             Intent intent = new Intent();
             intent.setAction(Intent.ACTION_SEND);
             intent.setType("*/*");
